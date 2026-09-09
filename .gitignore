@@ -1,0 +1,15 @@
+# OS / editor cruft
+.DS_Store
+~$*.xlsx
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Weekly reports (weekly_reports/*.xlsx) are kept as a permanent archive in git.
+
+# Generated website payload (index.html is committed; these are rebuilt each run)
+site/data.json
+site/downloads/

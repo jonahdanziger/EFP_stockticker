@@ -1,0 +1,62 @@
+ticker,company.name,pcbt.index,ca.index,tri.county.index,us.index,reporting.flag
+^DJI,Dow Jones Industrial Average,0,0,0,1,0
+^GSPC,S & P 500,0,0,0,1,0
+^IXIC,NASDAQ,0,0,0,1,0
+^RUT,Russell 2000,0,0,0,1,0
+A,Agilent Technologies Inc.,0,1,0,0,0
+AAPL,Apple Computer Inc.,0,1,0,0,0
+ADBE,Adobe System Inc.,0,1,0,0,0
+AMAT,Applied Materials Inc.,0,1,0,0,0
+AMGN,Amgen Inc.,1,1,1,0,0
+APPF,"AppFolio, Inc.",1,0,0,0,0
+ATVI,Activision Inc.,0,1,0,0,0
+AVY,Avery Dennison Corp.,0,1,0,0,0
+BAC,Bank of America,1,0,0,0,0
+BEN,Franklin resources  Inc.,0,1,0,0,0
+CAMP,California Amplifier Co.,0,0,0,0,0
+CLX,Clorox Co.  ,0,1,0,0,0
+CSCO,Cisco Systems Inc.,0,1,0,0,0
+CVGW,Calavo Growers Inc.,1,0,1,0,0
+CVX,ChevronTexaco Corp.,0,1,0,0,0
+CWBC,Community West Bank,1,0,1,0,0
+DECK,Deckers Outdoor Corp.,1,0,1,0,0
+DIS,Walt Disney Co.  ,0,1,0,0,0
+DVA,DaVita Inc.,0,1,0,0,0
+EBAY,eBay Inc.,0,1,0,0,0
+EIX,Edison International ,0,1,0,0,0
+FAF,First American Corp.,0,1,0,0,0
+GOOG,Google Inc.,0,1,0,0,0
+GPS,"Gap, Inc.",0,1,0,0,0
+HPQ,Hewlett-Packard Co.,0,1,0,0,0
+INGN,Inogen Inc.,1,0,1,0,0
+INTC,Intel Corp.,0,1,0,0,0
+INTU,"Intuit, Inc.",0,1,0,0,0
+JNPR,Juniper Networks Inc.,0,1,0,0,0
+KBH,Kaufman and Broad Home Corp.,0,1,0,0,0
+LMNR,Limoneira Co.,1,0,0,0,0
+LMT,Lockheed Martin,1,0,0,0,0
+LTC,LTC Properties Inc.,0,0,1,0,0
+MAC,Macerich Co. ,0,1,0,0,0
+MAT,"Mattel, Inc.",0,1,0,0,0
+MCK,McKesson Corp.,0,1,0,0,0
+NOC,Northrop Grumman Corp.,0,1,0,0,0
+NTAP,Network Appliance Inc.,0,1,0,0,0
+ORCL,Oracle Corp.,0,1,0,0,0
+OXY,Occidental Petroleum Corporation,0,1,0,0,0
+PCG,PG&E Corp,1,1,0,0,0
+PG,Procter & Gamble,1,0,0,0,0
+PPBI,"Pacific Primer Bancorp, Inc.",1,0,0,0,0
+PSA,Public Storage Inc.,0,1,0,0,0
+QCOM,QUALCOMM Inc.,0,1,0,0,0
+RMD,ResMed Inc.,0,1,0,0,0
+SALM,Salem Communications Corp,0,0,0,0,0
+SMTC,Semtech,1,0,1,0,0
+SRE,Sempra Energy ,0,1,0,0,0
+TDY,Teledyne Technologies Inc.,1,1,1,0,0
+TTD,Trade Desk Inc,0,0,0,0,0
+WDC,Western Digital Corp.,0,1,0,0,0
+WFC,Wells Fargo & Co. ,1,1,0,0,0
+SONO,"Sonos, Inc.",1,0,0,0,0
+AVAV,AeroVironment,1,0,0,0,0
+CHTR,"Charter Communications, Inc.",1,0,0,0,0
+AVO,Mission Produce Inc.,1,0,0,0,0

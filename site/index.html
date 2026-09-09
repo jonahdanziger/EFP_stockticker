@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCBT Weekly Stock Report</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --ink: #1c2430;
+    --muted: #667085;
+    --line: #e4e7ec;
+    --accent: #14427a;
+    --accent-ink: #ffffff;
+    --pos: #067647;
+    --neg: #b42318;
+    --row-alt: #fafbfc;
+    --shadow: 0 1px 3px rgba(16,24,40,.08), 0 1px 2px rgba(16,24,40,.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1419; --card: #171e26; --ink: #e6edf3; --muted: #9aa7b4;
+      --line: #2a333d; --accent: #4a90d9; --accent-ink: #0f1419;
+      --pos: #4ade80; --neg: #f87171; --row-alt: #1b232c;
+      --shadow: 0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 56px; }
+  header { margin-bottom: 20px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; letter-spacing: -.01em; }
+  .sub { color: var(--muted); font-size: .9rem; }
+  .sub strong { color: var(--ink); }
+
+  .tabs {
+    display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 2px solid var(--line);
+    margin-bottom: 0;
+  }
+  .tab {
+    appearance: none; border: none; background: none; cursor: pointer;
+    padding: 10px 16px; font-size: .92rem; font-weight: 600; color: var(--muted);
+    border-bottom: 3px solid transparent; margin-bottom: -2px; border-radius: 6px 6px 0 0;
+  }
+  .tab:hover { color: var(--ink); background: var(--card); }
+  .tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .panel {
+    background: var(--card); border: 1px solid var(--line); border-top: none;
+    border-radius: 0 0 10px 10px; box-shadow: var(--shadow); padding: 16px;
+  }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px; text-decoration: none;
+    font-size: .88rem; font-weight: 600; padding: 9px 15px; border-radius: 8px;
+    border: 1px solid var(--accent); cursor: pointer;
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); }
+  .btn.ghost { background: transparent; color: var(--accent); }
+  .btn:hover { opacity: .9; }
+  .btn svg { width: 15px; height: 15px; }
+
+  .archive-list { list-style: none; margin: 0; padding: 0; }
+  .archive-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 4px; border-bottom: 1px solid var(--line);
+  }
+  .archive-item:last-child { border-bottom: none; }
+  .archive-date { font-weight: 600; }
+  .archive-tag {
+    font-size: .72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .04em; color: var(--accent); margin-left: 8px;
+  }
+  .archive-empty { color: var(--muted); padding: 24px 4px; }
+
+  .table-scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { text-align: left; padding: 9px 12px; white-space: nowrap; }
+  th {
+    font-size: .74rem; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--muted); border-bottom: 1px solid var(--line); font-weight: 700;
+  }
+  td { border-bottom: 1px solid var(--line); }
+  tbody tr:nth-child(even) { background: var(--row-alt); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.pos { color: var(--pos); font-weight: 600; }
+  td.neg { color: var(--neg); font-weight: 600; }
+  .sym { font-weight: 700; }
+
+  footer { margin-top: 22px; color: var(--muted); font-size: .8rem; text-align: center; }
+  .loading, .error { padding: 40px 16px; text-align: center; color: var(--muted); }
+  .error { color: var(--neg); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Pacific Coast Business Times &mdash; Weekly Stock Report</h1>
+    <div class="sub" id="meta">Loading&hellip;</div>
+  </header>
+
+  <div class="tabs" id="tabs" role="tablist"></div>
+  <div class="panel" id="panel">
+    <div class="loading">Loading report data&hellip;</div>
+  </div>
+
+  <footer>Updated automatically every Saturday &middot; data from Yahoo Finance</footer>
+</div>
+
+<script>
+const DOWNLOAD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+
+const PCT_COLS = new Set([
+  "Change from Previous Week",
+  "Change from Last Four Weeks",
+  "Change from Last 52 Weeks",
+]);
+const NUM_COLS = new Set([...PCT_COLS, "Latest Quote"]);
+
+function cellClass(col, value) {
+  const classes = [];
+  if (NUM_COLS.has(col)) classes.push("num");
+  if (PCT_COLS.has(col) && typeof value === "string") {
+    const v = value.trim();
+    if (v.startsWith("-")) classes.push("neg");
+    else if (v !== "NA" && v !== "0.00%") classes.push("pos");
+  }
+  if (col === "Symbol") classes.push("sym");
+  return classes.join(" ");
+}
+
+function renderCell(col, value) {
+  if (value === null || value === undefined) return "";
+  if (col === "Latest Quote" && typeof value === "number") {
+    return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  return String(value);
+}
+
+function renderTable(tab) {
+  const head = tab.columns.map(c => `<th>${c}</th>`).join("");
+  const body = tab.rows.map(row => {
+    const cells = tab.columns.map(c => {
+      const v = row[c];
+      return `<td class="${cellClass(c, v)}">${renderCell(c, v)}</td>`;
+    }).join("");
+    return `<tr>${cells}</tr>`;
+  }).join("");
+  return `<div class="table-scroll"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+function renderPanel(tab, fullFile) {
+  return `
+    <div class="actions">
+      <a class="btn ghost" href="downloads/${tab.tab_file}" download>${DOWNLOAD_ICON} Download this tab</a>
+      <a class="btn primary" href="downloads/${fullFile}" download>${DOWNLOAD_ICON} Download full report</a>
+    </div>
+    ${renderTable(tab)}
+  `;
+}
+
+function renderArchive(data) {
+  const items = data.archive || [];
+  if (!items.length) {
+    return '<div class="archive-empty">No archived reports yet.</div>';
+  }
+  const rows = items.map((r, i) => `
+    <li class="archive-item">
+      <span class="archive-date">Week ending ${r.date_pretty}${i === 0 ? '<span class="archive-tag">Latest</span>' : ''}</span>
+      <a class="btn ghost" href="downloads/${r.file}" download>${DOWNLOAD_ICON} Download</a>
+    </li>`).join("");
+  return `<ul class="archive-list">${rows}</ul>`;
+}
+
+const ARCHIVE_ID = "archive";
+
+function selectTab(data, id) {
+  const tabsEl = document.getElementById("tabs");
+  [...tabsEl.children].forEach(btn => {
+    btn.setAttribute("aria-selected", btn.dataset.id === id ? "true" : "false");
+  });
+  const panel = document.getElementById("panel");
+  if (id === ARCHIVE_ID) {
+    panel.innerHTML = renderArchive(data);
+  } else {
+    const tab = data.tabs.find(t => t.id === id);
+    panel.innerHTML = renderPanel(tab, data.full_report_file);
+  }
+}
+
+async function init() {
+  let data;
+  try {
+    const res = await fetch("data.json", { cache: "no-store" });
+    if (!res.ok) throw new Error(res.status);
+    data = await res.json();
+  } catch (e) {
+    document.getElementById("panel").innerHTML =
+      '<div class="error">Could not load report data. Please try again later.</div>';
+    document.getElementById("meta").textContent = "";
+    return;
+  }
+
+  document.getElementById("meta").innerHTML =
+    `Week ending <strong>${data.report_date_pretty}</strong>`;
+
+  const tabsEl = document.getElementById("tabs");
+  const tabButtons = data.tabs.map(t =>
+    `<button class="tab" role="tab" data-id="${t.id}">${t.label}</button>`
+  );
+  tabButtons.push(
+    `<button class="tab" role="tab" data-id="${ARCHIVE_ID}">Archive</button>`
+  );
+  tabsEl.innerHTML = tabButtons.join("");
+  [...tabsEl.children].forEach(btn => {
+    btn.addEventListener("click", () => selectTab(data, btn.dataset.id));
+  });
+
+  selectTab(data, data.tabs[0].id);
+}
+
+init();
+</script>
+</body>
+</html>
