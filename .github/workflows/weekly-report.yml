@@ -7,11 +7,13 @@ on:
     - cron: "0 14 * * 6"
   workflow_dispatch: {}   # allows a manual run from the Actions tab
 
-# Let the workflow commit the archived report and publish to GitHub Pages.
+# Let the workflow commit the archived report, publish to GitHub Pages, and
+# open an issue when tickers go missing.
 permissions:
   contents: write
   pages: write
   id-token: write
+  issues: write
 
 # Only one Pages deployment at a time.
 concurrency:
@@ -36,6 +38,37 @@ jobs:
 
       - name: Generate weekly report and website payload
         run: python stock_ticker.py
+
+      - name: Notify about tickers with no data (likely delisted)
+        if: ${{ hashFiles('skipped_tickers.txt') != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # skipped_tickers.txt exists only when at least one ticker had no
+          # data. Consolidate into a single open issue so you get one email
+          # thread instead of a brand-new issue every week.
+          if [ ! -s skipped_tickers.txt ]; then
+            echo "No skipped tickers this run."
+            exit 0
+          fi
+
+          TITLE="⚠️ Stock ticker: symbols returned no data"
+          BODY="The weekly run on $(date -u +%Y-%m-%d) could not download data for the following symbols (they may be delisted or renamed). If a change is permanent, remove or update the symbol in \`stock_list.csv\` (or add it to \`EXCLUDED_TICKERS\` in \`stock_ticker.py\`).\n\n"
+          while IFS=$'\t' read -r sym name; do
+            [ -z "$sym" ] && continue
+            BODY="${BODY}- \`${sym}\` ${name}\n"
+          done < skipped_tickers.txt
+          BODY=$(printf "%b" "$BODY")
+
+          EXISTING=$(gh issue list --state open --search "in:title $TITLE" \
+            --json number --jq '.[0].number' 2>/dev/null || echo "")
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "$BODY"
+            echo "Commented on existing issue #$EXISTING."
+          else
+            gh issue create --title "$TITLE" --body "$BODY"
+            echo "Opened a new issue."
+          fi
 
       - name: Commit archived report to the repository
         run: |

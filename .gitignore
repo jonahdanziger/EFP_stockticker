@@ -13,3 +13,6 @@ venv/
 # Generated website payload (index.html is committed; these are rebuilt each run)
 site/data.json
 site/downloads/
+
+# Per-run diagnostics
+skipped_tickers.txt

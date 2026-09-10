@@ -216,6 +216,27 @@ def format_sheet(df: pd.DataFrame, dollar_quote: bool) -> pd.DataFrame:
 # Main
 # --------------------------------------------------------------------------
 
+def write_skipped_report(skipped: list[str], company_by_ticker: dict,
+                         path: Path) -> None:
+    """Write the list of tickers that returned no data (likely delisted).
+
+    Always (re)writes the file: a non-empty file is the signal the CI workflow
+    uses to notify you; an empty file means everything downloaded cleanly.
+    """
+    lines = [f"{t}\t{company_by_ticker.get(t, '')}" for t in skipped]
+    path.write_text("\n".join(lines))
+    if skipped:
+        print("\n" + "=" * 60)
+        print(f"ATTENTION: {len(skipped)} ticker(s) returned NO data "
+              f"(possibly delisted or renamed):")
+        for t in skipped:
+            print(f"  - {t}  ({company_by_ticker.get(t, '')})")
+        print("Update stock_list.csv / EXCLUDED_TICKERS if these are permanent.")
+        print("=" * 60 + "\n")
+    else:
+        print("All tickers downloaded successfully (none skipped).")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Weekly PCBT stock report generator.")
     here = Path(__file__).resolve().parent
@@ -244,7 +265,12 @@ def main() -> int:
 
     # ---- Download daily data (keep the ^ prefix; strip it for display) ----
     tickers = stocklist["ticker"].tolist()
+    company_by_ticker = dict(zip(stocklist["ticker"], stocklist["company.name"]))
     daily_closes_raw = download_daily_closes(tickers)
+
+    # Any expected ticker that returned no data (likely delisted/renamed).
+    skipped = [t for t in tickers if t not in daily_closes_raw]
+    write_skipped_report(skipped, company_by_ticker, here / "skipped_tickers.txt")
 
     # Strip the ^ that Yahoo uses for index symbols, in both data and list.
     daily_closes = {t.lstrip("^"): s for t, s in daily_closes_raw.items()}
